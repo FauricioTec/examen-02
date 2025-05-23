@@ -5,9 +5,12 @@
   "keywords": [],
   "main": "src/index.tsx",
   "dependencies": {
+    "@reduxjs/toolkit": "^2.8.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-scripts": "^5.0.0"
+    "react-redux": "^9.2.0",
+    "react-scripts": "^5.0.0",
+    "styled-components": "^6.1.18"
   },
   "devDependencies": {
     "@types/react": "19.0.0",
@@ -21,5 +24,10 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
-  "browserslist": [">0.2%", "not dead", "not ie <= 11", "not op_mini all"]
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
