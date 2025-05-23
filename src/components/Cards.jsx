@@ -1,3 +1,4 @@
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 
 const StylesWrapper = styled.section`
@@ -10,9 +11,17 @@ const StylesWrapper = styled.section`
 `;
 
 export default function Cards() {
+  const words = useSelector((state) => state.game.words);
+
   return (
     <>
-      <StylesWrapper>Hola</StylesWrapper>
+      <StylesWrapper>
+        {words.map((word, index) => (
+          <div className="card" key={index}>
+            {word}
+          </div>
+        ))}
+      </StylesWrapper>
     </>
   );
 }
