@@ -1,61 +1,63 @@
-import styled from "styled-components";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  fetchRandomWords,
+  resetGame,
+  selectCard,
+  checkMatch,
+} from "../features/gameSlice";
+import { useEffect, useState } from "react";
 
-const CardWrapper = styled.div`
-  width: 100px;
-  height: 150px;
-  background-image: linear-gradient(163deg, #00ff75 0%, #3700ff 100%);
-  border-radius: 20px;
-  transition: all 0.3s;
-  margin: 10px;
-  position: relative;
+export default function Card({ index, word }) {
+  const dispatch = useDispatch();
+  const guessedWords = useSelector((state) => state.game.guessedWords);
+  const health = useSelector((state) => state.game.health);
+  const selection = useSelector((state) => state.game.selection);
 
-  &:hover {
-    box-shadow: 0px 0px 30px 1px rgba(0, 255, 117, 0.3);
-  }
+  const isGuessed = guessedWords.includes(word);
 
-  &.flipped,
-  &.guessed {
-    transform: rotateY(180deg);
-  }
+  const [flipped, setFlipped] = useState(false);
 
-  &.flipped ${"" /* referencia a componente anidado */} > div,
-  &.guessed > div {
-    display: block;
-  }
-`;
+  useEffect(() => {
+    if (isGuessed) {
+      setFlipped(true);
+    }
+  }, [isGuessed]);
 
-const CardInner = styled.div`
-  cursor: pointer;
-  width: 100px;
-  height: 150px;
-  background-color: #1a1a1a;
-  transition: all 0.2s;
-  border-radius: 20px;
+  useEffect(() => {
+    if (selection.length === 2) {
+      setTimeout(() => {
+        dispatch(checkMatch());
+        if (health <= 1) {
+          dispatch(resetGame());
+          dispatch(fetchRandomWords());
+        }
+      }, 800);
+    }
+  }, [selection, dispatch, health]);
 
-  &:hover {
-    transform: scale(0.98);
-  }
-`;
+  useEffect(() => {
+    if (selection.length === 0 && !isGuessed) {
+      setFlipped(false);
+    } else if (selection.some((sel) => sel.index === index)) {
+      setFlipped(true);
+    }
+  }, [selection, isGuessed, index]);
 
-const CardValue = styled.div`
-  display: none;
-  color: #fff;
-  position: absolute;
-  top: 50px;
-  left: 0;
-  text-align: center;
-  width: 100%;
-  transform: rotateY(180deg);
-`;
+  const handleClick = () => {
+    if (flipped || isGuessed || selection.length === 2) return;
 
-export default function Card({ value, flipped, guessed }) {
+    dispatch(selectCard({ index, word }));
+  };
+
   return (
-    <CardWrapper
-      className={`${flipped ? "flipped" : ""} ${guessed ? "guessed" : ""}`}
+    <div
+      className={`AppCard ${flipped ? "flipped" : ""} ${
+        isGuessed ? "guessed" : ""
+      }`}
+      onClick={handleClick}
     >
-      <CardInner>
-        <CardValue>{value}</CardValue>
-      </CardInner>
-    </CardWrapper>
+      <div className="AppCardStyled"></div>
+      <div className="AppCardValue">{word}</div>
+    </div>
   );
 }

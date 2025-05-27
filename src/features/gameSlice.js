@@ -14,9 +14,10 @@ const initialState = {
   words: [],
   health: 5,
   guessedWords: [],
-  currentWordIndex: null,
-  gameStopped: false,
-  loading: false, // agrega para controlar estado de carga
+  currentWord: null,
+  loading: false,
+  gameCounter: 0,
+  selection: [],
 };
 
 const gameSlice = createSlice({
@@ -25,6 +26,9 @@ const gameSlice = createSlice({
   reducers: {
     setWords(state, action) {
       state.words = action.payload;
+    },
+    setCurrentWord(state, action) {
+      state.currentWord = action.payload;
     },
     reduceHealth(state) {
       state.health -= 1;
@@ -36,8 +40,33 @@ const gameSlice = createSlice({
       state.words = [];
       state.health = 5;
       state.guessedWords = [];
-      state.gameStopped = false;
-      state.currentWordIndex = null;
+      state.currentWord = null;
+      state.loading = false;
+      state.selection = [];
+      state.gameCounter += 1;
+    },
+    selectCard(state, action) {
+      if (state.selection.length < 2) {
+        state.selection.push(action.payload);
+      }
+    },
+    clearSelection(state) {
+      state.selection = [];
+    },
+    checkMatch(state) {
+      if (state.selection.length === 2) {
+        const [first, second] = state.selection;
+
+        if (first.word === second.word && first.index !== second.index) {
+          if (!state.guessedWords.includes(first.word)) {
+            state.guessedWords.push(first.word);
+          }
+        } else {
+          state.health -= 1;
+        }
+
+        state.selection = [];
+      }
     },
   },
   extraReducers: (builder) => {
@@ -46,7 +75,11 @@ const gameSlice = createSlice({
         state.loading = true;
       })
       .addCase(fetchRandomWords.fulfilled, (state, action) => {
-        state.words = action.payload;
+        state.words = action.payload.flatMap((item) => [`${item}`, `${item}`]);
+        state.words = state.words
+          .map((a) => ({ sort: Math.random(), value: a }))
+          .sort((a, b) => a.sort - b.sort)
+          .map((a) => a.value);
         state.loading = false;
       })
       .addCase(fetchRandomWords.rejected, (state) => {
@@ -55,7 +88,15 @@ const gameSlice = createSlice({
   },
 });
 
-export const { setWords, reduceHealth, addGuessedWord, resetGame } =
-  gameSlice.actions;
+export const {
+  setWords,
+  setCurrentWord,
+  reduceHealth,
+  addGuessedWord,
+  resetGame,
+  selectCard,
+  clearSelection,
+  checkMatch,
+} = gameSlice.actions;
 
 export default gameSlice.reducer;
